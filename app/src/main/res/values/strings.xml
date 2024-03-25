@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">IronSource_Android</string>
+    <string name="title_interstitial">Interstitial</string>
+    <string name="title_interscroller">Interscroller</string>
+    <string name="title_infeed">Infeed</string>
+    <string name="load_interstitial">Load Interstitial</string>
+    <string name="show_interstitial">Show Interstitial</string>
+    <string name="load_infeed">Load Infeed</string>
+    <string name="show_infeed">Show Infeed</string>
+    <string name="load_interscroller">Load Interscroller</string>
+    <string name="show_interscroller">Show Interscroller</string>
+</resources>

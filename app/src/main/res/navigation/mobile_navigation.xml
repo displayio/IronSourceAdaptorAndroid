@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_interstitial">
+
+    <fragment
+        android:id="@+id/navigation_interstitial"
+        android:name="com.brandio.ironsource_android.ui.interstitial.InterstitialFragment"
+        android:label="@string/title_interstitial"
+        tools:layout="@layout/fragment_interstitial" />
+
+    <fragment
+        android:id="@+id/navigation_interscroller"
+        android:name="com.brandio.ironsource_android.ui.interscroller.InterscrollerFragment"
+        android:label="@string/title_interscroller"
+        tools:layout="@layout/fragment_interscroller" />
+
+    <fragment
+        android:id="@+id/navigation_infeed"
+        android:name="com.brandio.ironsource_android.ui.infeed.InfeedFragment"
+        android:label="@string/title_infeed"
+        tools:layout="@layout/fragment_infeed" />
+</navigation>

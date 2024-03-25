@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_interstitial"
+        android:icon="@drawable/ad_unit_interstitial"
+        android:title="@string/title_interstitial" />
+
+    <item
+        android:id="@+id/navigation_interscroller"
+        android:icon="@drawable/ad_unit_interscroller"
+        android:title="@string/title_interscroller" />
+
+    <item
+        android:id="@+id/navigation_infeed"
+        android:icon="@drawable/ad_unit_infeed"
+        android:title="@string/title_infeed" />
+
+</menu>
