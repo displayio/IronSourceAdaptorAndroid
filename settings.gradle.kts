@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "IronSource_Android"
 include(":app")
- 
+include(":adaptorIronSource")
