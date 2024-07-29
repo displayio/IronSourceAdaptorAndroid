@@ -4,14 +4,14 @@ plugins {
     id("com.android.library")
 }
 
-version = "5.0.0"
+version = "5.3.3"
 
 android {
     namespace = "com.ironsource.adapters.custom.dio"
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 16
+        minSdk = 21
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -38,7 +38,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation ("com.brandio.ads:sdk:5.1.0")
+    implementation ("com.brandio.ads:sdk:5.3.3")
     implementation ("com.ironsource.sdk:mediationsdk:7.9.0")
     implementation ("com.ironsource:adqualitysdk:7.17.0")
 }

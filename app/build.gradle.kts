@@ -48,7 +48,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
-    implementation ("com.brandio.ads:sdk:5.1.0")
+    implementation ("com.brandio.ads:sdk:5.3.3")
     implementation ("com.ironsource.sdk:mediationsdk:7.9.0")
     implementation ("com.ironsource:adqualitysdk:7.17.0")
 }
