@@ -57,7 +57,7 @@ public class InfeedFragment extends Fragment {
                     }
                 }
 
-                DIOAdRequestHelper.addCustomAdRequestData();
+//                DIOAdRequestHelper.addCustomAdRequestData();
                 banner = IronSource.createBanner(getActivity(), ISBannerSize.RECTANGLE);
                 banner.setLevelPlayBannerListener(new BannerAdListener(new UIControllerInterface() {
                     @Override

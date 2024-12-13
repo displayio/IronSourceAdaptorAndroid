@@ -48,7 +48,13 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
-    implementation ("com.brandio.ads:sdk:5.3.3")
-    implementation ("com.ironsource.sdk:mediationsdk:7.9.0")
-    implementation ("com.ironsource:adqualitysdk:7.17.0")
+    implementation ("com.brandio.ads:sdk:5.3.8")
+    implementation ("com.ironsource.sdk:mediationsdk:8.5.0")
+    implementation ("com.ironsource:adqualitysdk:7.22.2")
+
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation ("com.google.android.gms:play-services-appset:16.0.0")
+    implementation ("com.google.android.gms:play-services-ads-identifier:18.1.0")
+    implementation ("com.google.android.gms:play-services-basement:18.1.0")
+
 }

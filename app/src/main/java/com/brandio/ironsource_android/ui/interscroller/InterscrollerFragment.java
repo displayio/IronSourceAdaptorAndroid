@@ -61,7 +61,7 @@ public class InterscrollerFragment extends Fragment {
                         IronSource.destroyBanner(banner);
                     }
                 }
-                DIOAdRequestHelper.addCustomAdRequestData();
+//                DIOAdRequestHelper.addCustomAdRequestData();
                 banner = IronSource.createBanner(getActivity(), ISBannerSize.RECTANGLE);
                 banner.setLevelPlayBannerListener(new BannerAdListener(new UIControllerInterface() {
                     @Override

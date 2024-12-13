@@ -73,7 +73,7 @@ public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
                         AdUnit.getPxToDp(300), AdUnit.getPxToDp(250));
                 if (placement instanceof BannerPlacement) {
                     bannerDIOAd = ad;
-                    BannerContainer bannerContainer = ((BannerPlacement) placement).getContainer(activity, adRequestId);
+                    BannerContainer bannerContainer = ((BannerPlacement) placement).getContainer(adRequestId);
                     adView = BannerContainer.getAdView(activity);
                     bannerContainer.bindTo(adView);
                     layoutParams = new FrameLayout.LayoutParams(
@@ -81,23 +81,23 @@ public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
                 } else if (placement instanceof MediumRectanglePlacement) {
                     mrectDIOAd = ad;
                     MediumRectangleContainer mediumRectangleContainer = ((MediumRectanglePlacement) placement)
-                            .getContainer(activity, adRequestId);
+                            .getContainer(adRequestId);
                     adView = BannerContainer.getAdView(activity);
                     mediumRectangleContainer.bindTo(adView);
                 } else if (placement instanceof InfeedPlacement) {
                     infeedDIOAd = ad;
                     adView = InfeedContainer.getAdView(activity);
                     InfeedContainer infeedContainer =
-                            ((InfeedPlacement) placement).getContainer(activity, adRequestId);
-                    infeedContainer.bindTo((ViewGroup) adView);
+                            ((InfeedPlacement) placement).getContainer(adRequestId);
+                    infeedContainer.bindTo(adView);
                 } else if (placement instanceof InterscrollerPlacement) {
                     intersrollerDIOAd = ad;
                     adView = InterscrollerContainer.getAdView(activity);
                     adView.setId(Integer.parseInt(ad.getPlacementId()));
                     InterscrollerContainer interscrollerContainer =
-                            ((InterscrollerPlacement) placement).getContainer(activity, adRequestId);
+                            ((InterscrollerPlacement) placement).getContainer(adRequestId);
                     try {
-                        interscrollerContainer.bindTo((ViewGroup) adView);
+                        interscrollerContainer.bindTo(adView);
                     } catch (Exception e) {
                         listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0,
                                 "DIO SDK Failed to create ad view");

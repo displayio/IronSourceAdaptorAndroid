@@ -46,7 +46,7 @@ public class InterstitialFragment extends Fragment {
         loadInterstitial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DIOAdRequestHelper.addCustomAdRequestData();
+//                DIOAdRequestHelper.addCustomAdRequestData();
                 IronSource.setAdaptersDebug(true);
                 IronSource.loadInterstitial();
             }
