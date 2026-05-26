@@ -4,8 +4,8 @@ import static com.ironsource.adapters.custom.dio.DIOCustomAdapter.DIO_AD_REQUEST
 
 import com.brandio.ads.request.AdRequest;
 import com.brandio.ads.request.AdRequestBuilder;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceSegment;
+import com.unity3d.mediation.LevelPlay;
+import com.unity3d.mediation.segment.LevelPlaySegment;
 
 import org.json.JSONObject;
 
@@ -17,13 +17,12 @@ public class DIOAdRequestHelper {
                 .setUserId("USER_123")
                 .body();
 
-        IronSource.setMetaData(DIO_AD_REQUEST, adRequest.toString());
-        IronSource.setNetworkData(DIO_AD_REQUEST, adRequest);
-        IronSource.setDynamicUserId("setDynamicUserId");
-        IronSource.setUserId("setUserId");
+        LevelPlay.setMetaData(DIO_AD_REQUEST, adRequest.toString());
+        LevelPlay.setNetworkData(DIO_AD_REQUEST, adRequest);
+        LevelPlay.setDynamicUserId("setDynamicUserId");
 
-        IronSourceSegment ironSourceSegmen = new IronSourceSegment();
-        ironSourceSegmen.setCustom(DIO_AD_REQUEST, adRequest.toString());
-        IronSource.setSegment(ironSourceSegmen);
+        LevelPlaySegment segment = new LevelPlaySegment();
+        segment.setCustom(DIO_AD_REQUEST, adRequest.toString());
+        LevelPlay.setSegment(segment);
     }
 }

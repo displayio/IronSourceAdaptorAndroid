@@ -4,21 +4,20 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.brandio.ironsource_android.MainActivity;
 import com.brandio.ironsource_android.callback.InterstitialAdListener;
 import com.brandio.ironsource_android.callback.UIControllerInterface;
 import com.brandio.ironsource_android.databinding.FragmentInterstitialBinding;
-import com.brandio.ironsource_android.tool.DIOAdRequestHelper;
 import com.google.android.material.button.MaterialButton;
-import com.ironsource.mediationsdk.IronSource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.unity3d.mediation.LevelPlay;
+import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd;
 
 public class InterstitialFragment extends Fragment {
 
@@ -26,6 +25,7 @@ public class InterstitialFragment extends Fragment {
     private MaterialButton loadInterstitial;
     private MaterialButton showInterstitial;
     private InterstitialViewModel interstitialViewModel;
+    private LevelPlayInterstitialAd interstitialAd;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,9 +46,12 @@ public class InterstitialFragment extends Fragment {
         loadInterstitial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                DIOAdRequestHelper.addCustomAdRequestData();
-                IronSource.setAdaptersDebug(true);
-                IronSource.loadInterstitial();
+                if (!MainActivity.sdkInitialized) {
+                    Toast.makeText(requireContext(), "IronSource SDK not initialized yet", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                LevelPlay.setAdaptersDebug(true);
+                interstitialAd.loadAd();
             }
         });
         showInterstitial = binding.showInterstitial;
@@ -56,7 +59,9 @@ public class InterstitialFragment extends Fragment {
         showInterstitial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                IronSource.showInterstitial();
+                if (interstitialAd.isAdReady()) {
+                    interstitialAd.showAd(requireActivity());
+                }
             }
         });
     }
@@ -64,7 +69,8 @@ public class InterstitialFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IronSource.setLevelPlayInterstitialListener(new InterstitialAdListener(new UIControllerInterface() {
+        interstitialAd = new LevelPlayInterstitialAd(MainActivity.INTERSTITIAL_AD_UNIT_ID);
+        interstitialAd.setListener(new InterstitialAdListener(new UIControllerInterface() {
             @Override
             public void switchLoadButton(Boolean isEnabled) {
                 interstitialViewModel.setLoadState(isEnabled);
@@ -81,5 +87,11 @@ public class InterstitialFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        interstitialAd = null;
     }
 }

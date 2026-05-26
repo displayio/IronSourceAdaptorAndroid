@@ -6,11 +6,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.brandio.ads.Controller;
-import com.brandio.ads.exceptions.DIOError;
-import com.brandio.ads.listeners.SdkInitListener;
-import com.brandio.ironsource_android.callback.InterstitialAdListener;
-import com.brandio.ironsource_android.callback.UIControllerInterface;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,25 +15,24 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.brandio.ironsource_android.databinding.ActivityMainBinding;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.integration.IntegrationHelper;
-import com.ironsource.mediationsdk.sdk.InitializationListener;
-import com.ironsource.mediationsdk.utils.IronSourceUtils;
 import com.unity3d.mediation.LevelPlay;
 import com.unity3d.mediation.LevelPlayConfiguration;
 import com.unity3d.mediation.LevelPlayInitError;
 import com.unity3d.mediation.LevelPlayInitListener;
 import com.unity3d.mediation.LevelPlayInitRequest;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String APP_KEY = "1dc3f8185";
+    public static final String INTERSTITIAL_AD_UNIT_ID = "p6g336rjv5poqikz";
+    public static final String INFEED_AD_UNIT_ID = "q6ksnqakrnj7f4sm";
+    public static final String INTERSCROLLER_AD_UNIT_ID = "kuq0ay1tewbl178z";
+    public static final String NATIVE_AD_UNIT_ID = "jdhoydzd301ctp5c";
+    public static final String REWARDED_AD_UNIT_ID = "dfmt05knamyyvgg5";
     public static final String TAG = "IS_Integration";
-    public static final String IS_VER = "IronSource SDK Version: " + IronSourceUtils.getSDKVersion();
+    public static final String IS_VER = "IronSource SDK Version: " + LevelPlay.getSdkVersion();
     public static final String DIO_VER = "DisplayIO SDK Version: " + Controller.getInstance().getVer();
+    public static volatile boolean sdkInitialized = false;
     private ActivityMainBinding binding;
 
     @Override
@@ -66,34 +60,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initIronSourceSDK() {
-//        IronSource.init(this, APP_KEY, new InitializationListener() {
-//            @Override
-//            public void onInitializationComplete() {
-//                Log.e(TAG, "IronSource SDK initialized");
-//                IntegrationHelper.validateIntegration(MainActivity.this);
-//                Toast.makeText(MainActivity.this, "IronSource SDK initialized", Toast.LENGTH_SHORT).show();
-//
-//                Controller.getInstance().init(MainActivity.this, "7729", new SdkInitListener() {
-//                    @Override
-//                    public void onInit() {
-//                        Toast.makeText(MainActivity.this, "DIO SDK initialized", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onInitError(DIOError dioError) {
-//                        Toast.makeText(MainActivity.this, "DIO SDK init error", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//            }
-//        });
-
-        // Init the SDK when implementing the Multiple Ad Units Interstitial and Banner APIs, and Rewarded using legacy APIs
-        List<LevelPlay.AdFormat> legacyAdFormats = Arrays.asList(LevelPlay.AdFormat.REWARDED,
-                LevelPlay.AdFormat.INTERSTITIAL, LevelPlay.AdFormat.BANNER);
-
         LevelPlayInitRequest initRequest = new LevelPlayInitRequest.Builder(APP_KEY)
-                .withLegacyAdFormats(legacyAdFormats)
-                .withUserId("Some_User_ID")
+//                .withUserId("Some_User_ID")
                 .build();
         LevelPlayInitListener initListener = new LevelPlayInitListener() {
             @Override
@@ -104,19 +72,11 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void onInitSuccess(LevelPlayConfiguration configuration) {
+                sdkInitialized = true;
                 Toast.makeText(MainActivity.this, "IronSource SDK initialized", Toast.LENGTH_SHORT).show();
+                LevelPlay.validateIntegration(MainActivity.this);
             }
         };
         LevelPlay.init(MainActivity.this, initRequest, initListener);
-
     }
-    protected void onResume() {
-        super.onResume();
-        IronSource.onResume(this);
-    }
-    protected void onPause() {
-        super.onPause();
-        IronSource.onPause(this);
-    }
-
 }

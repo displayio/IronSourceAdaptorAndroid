@@ -4,22 +4,21 @@ plugins {
     id("com.android.library")
 }
 
-version = "5.3.8"
+version = "5.7.1"
 
 android {
     namespace = "com.ironsource.adapters.custom.dio"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -33,14 +32,9 @@ android {
 }
 
 dependencies {
-    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    implementation ("com.brandio.ads:sdk:5.4.0")
-    implementation ("com.ironsource.sdk:mediationsdk:8.5.0")
-    implementation ("com.ironsource:adqualitysdk:7.22.2")
+    implementation ("com.brandio.ads:sdk:5.7.1")
+    implementation ("com.ironsource.sdk:mediationsdk:9.2.0")
 }
 
 //   ./gradlew makeAar

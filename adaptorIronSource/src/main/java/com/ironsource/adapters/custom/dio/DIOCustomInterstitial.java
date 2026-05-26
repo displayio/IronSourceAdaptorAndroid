@@ -1,8 +1,9 @@
 package com.ironsource.adapters.custom.dio;
 
-import static com.ironsource.adapters.custom.dio.DIOCustomAdapter.DIO_AD_REQUEST;
-
 import android.app.Activity;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
@@ -22,10 +23,7 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrorType;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 import com.ironsource.mediationsdk.model.NetworkSettings;
 
-import java.util.Map;
-
 public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
-    private Activity activity;
     private Ad interstitialAd;
 
     public DIOCustomInterstitial(NetworkSettings networkSettings) {
@@ -33,8 +31,7 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
     }
 
     @Override
-    public void loadAd(@NonNull AdData adData, @NonNull Activity activity, @NonNull InterstitialAdListener listener) {
-        this.activity = activity;
+    public void loadAd(@NonNull AdData adData, @NonNull Context context, @NonNull InterstitialAdListener listener) {
         Controller controller = Controller.getInstance();
         if (!controller.isInitialized()) {
             listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0, "DIO SDK not initialized");
@@ -60,11 +57,6 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
             return;
         }
 
-        Map<String, Object> map1 = adData.getAdUnitData();
-        Map<String, Object> map2 = adData.getConfiguration();
-        String adRequestString = adData.getString(DIO_AD_REQUEST);
-        String serverData = adData.getServerData();
-
         AdRequest adRequest = placement.newAdRequest();
         adRequest.setAdRequestListener(new AdRequestListener() {
             @Override
@@ -76,28 +68,32 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
             @Override
             public void onNoAds(DIOError dioError) {
                 listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        "DIO SDK No fill");
+                        dioError != null && dioError.getMessage() != null
+                                ? dioError.getMessage()
+                                : "DIO SDK No fill");
             }
 
             @Override
             public void onFailedToLoad(DIOError dioError) {
                 listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        "DIO SDK Failed to load ad");
+                        dioError != null && dioError.getMessage() != null
+                                ? dioError.getMessage()
+                                : "DIO SDK Failed to load ad");
             }
         });
         adRequest.requestAd();
     }
 
     @Override
-    public void showAd(@NonNull AdData adData, @NonNull InterstitialAdListener listener) {
-        if (interstitialAd == null || activity == null) {
-            listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL, "Missing Ad or Context object");
+    public void showAd(@NonNull AdData adData, @NonNull Activity activity, @NonNull InterstitialAdListener listener) {
+        if (interstitialAd == null) {
+            listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL, "Missing Ad object");
+            return;
         }
         interstitialAd.setEventListener(new AdEventListener() {
             @Override
             public void onShown(Ad ad) {
                 listener.onAdOpened();
-                listener.onAdShowSuccess();
                 listener.onAdVisible();
                 if (ad instanceof Interstitial.InterstitialVideo) {
                     listener.onAdStarted();
@@ -105,8 +101,9 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
             }
 
             @Override
-            public void onFailedToShow(Ad ad) {
-                listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL, "Failed to show ad");
+            public void onFailedToShow(Ad ad, DIOError error) {
+                listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL,
+                        error != null ? error.getMessage() : "DIO SDK Failed to show ad");
             }
 
             @Override
@@ -136,5 +133,23 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
     @Override
     public boolean isAdAvailable(@NonNull AdData adData) {
         return interstitialAd != null && !interstitialAd.isImpressed();
+    }
+
+    @Override
+    public void destroyAd(@NonNull AdData adData) {
+        runOnMain(() -> {
+            if (interstitialAd != null) {
+                interstitialAd.close();
+                interstitialAd = null;
+            }
+        });
+    }
+
+    private static void runOnMain(Runnable r) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            r.run();
+        } else {
+            new Handler(Looper.getMainLooper()).post(r);
+        }
     }
 }

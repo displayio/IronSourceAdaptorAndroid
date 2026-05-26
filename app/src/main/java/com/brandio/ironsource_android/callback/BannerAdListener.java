@@ -3,12 +3,11 @@ package com.brandio.ironsource_android.callback;
 
 import android.util.Log;
 
-import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo;
-import com.ironsource.mediationsdk.logger.IronSourceError;
-import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener;
-import com.ironsource.mediationsdk.sdk.LevelPlayInterstitialListener;
+import com.unity3d.mediation.LevelPlayAdError;
+import com.unity3d.mediation.LevelPlayAdInfo;
+import com.unity3d.mediation.banner.LevelPlayBannerAdViewListener;
 
-public class BannerAdListener implements LevelPlayBannerListener {
+public class BannerAdListener implements LevelPlayBannerAdViewListener {
     private final String TAG = BannerAdListener.class.getSimpleName();
 
     private final UIControllerInterface controllerInterface;
@@ -17,40 +16,47 @@ public class BannerAdListener implements LevelPlayBannerListener {
         this.controllerInterface = controllerInterface;
     }
 
-    // Invoked each time a banner was loaded. Either on refresh, or manual load.
-    //  AdInfo parameter includes information about the loaded ad
     @Override
-    public void onAdLoaded(AdInfo adInfo) {
+    public void onAdLoaded(LevelPlayAdInfo adInfo) {
         Log.e(TAG, "adInfo = " + adInfo);
         controllerInterface.switchLoadButton(false);
         controllerInterface.switchShowButton(true);
     }
-    // Invoked when the banner loading process has failed.
-    //  This callback will be sent both for manual load and refreshed banner failures.
+
     @Override
-    public void onAdLoadFailed(IronSourceError error) {
+    public void onAdLoadFailed(LevelPlayAdError error) {
         Log.e(TAG, "error = " + error);
         controllerInterface.switchLoadButton(true);
         controllerInterface.switchShowButton(false);
     }
-    // Invoked when end user clicks on the banner ad
+
     @Override
-    public void onAdClicked(AdInfo adInfo) {
+    public void onAdClicked(LevelPlayAdInfo adInfo) {
         Log.e(TAG, "adInfo = " + adInfo);
     }
-    // Notifies the presentation of a full screen content following user click
+
     @Override
-    public void onAdScreenPresented(AdInfo adInfo) {
-        Log.e(TAG, "onAdScreenPresented, adInfo = " + adInfo);
+    public void onAdDisplayed(LevelPlayAdInfo adInfo) {
+        Log.e(TAG, "onAdDisplayed, adInfo = " + adInfo);
     }
-    // Notifies the presented screen has been dismissed
+
     @Override
-    public void onAdScreenDismissed(AdInfo adInfo) {
-        Log.e(TAG, "adInfo = " + adInfo);
+    public void onAdDisplayFailed(LevelPlayAdInfo adInfo, LevelPlayAdError error) {
+        Log.e(TAG, "onAdDisplayFailed, error = " + error + " | adInfo = " + adInfo);
     }
-    //Invoked when the user left the app
+
     @Override
-    public void onAdLeftApplication(AdInfo adInfo) {
-        Log.e(TAG, "adInfo = " + adInfo);
+    public void onAdExpanded(LevelPlayAdInfo adInfo) {
+        Log.e(TAG, "onAdExpanded, adInfo = " + adInfo);
+    }
+
+    @Override
+    public void onAdCollapsed(LevelPlayAdInfo adInfo) {
+        Log.e(TAG, "onAdCollapsed, adInfo = " + adInfo);
+    }
+
+    @Override
+    public void onAdLeftApplication(LevelPlayAdInfo adInfo) {
+        Log.e(TAG, "onAdLeftApplication, adInfo = " + adInfo);
     }
 }

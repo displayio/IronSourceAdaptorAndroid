@@ -4,25 +4,21 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.brandio.ironsource_android.MainActivity;
 import com.brandio.ironsource_android.callback.BannerAdListener;
-import com.brandio.ironsource_android.callback.InterstitialAdListener;
 import com.brandio.ironsource_android.callback.UIControllerInterface;
 import com.brandio.ironsource_android.databinding.FragmentInfeedBinding;
-import com.brandio.ironsource_android.tool.DIOAdRequestHelper;
 import com.google.android.material.button.MaterialButton;
-import com.ironsource.mediationsdk.ISBannerSize;
-import com.ironsource.mediationsdk.IronSource;
-import com.ironsource.mediationsdk.IronSourceBannerLayout;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.unity3d.mediation.LevelPlay;
+import com.unity3d.mediation.LevelPlayAdSize;
+import com.unity3d.mediation.banner.LevelPlayBannerAdView;
 
 public class InfeedFragment extends Fragment {
 
@@ -30,7 +26,7 @@ public class InfeedFragment extends Fragment {
     private MaterialButton loadInfeed;
     private MaterialButton showInfeed;
     private InfeedViewModel infeedViewModel;
-    private IronSourceBannerLayout banner;
+    private LevelPlayBannerAdView banner;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -49,17 +45,18 @@ public class InfeedFragment extends Fragment {
         loadInfeed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                IronSource.setAdaptersDebug(true);
-                if (banner != null && !banner.isDestroyed()) {
-                    if (banner.getParent() != null) {
-                        ((ViewGroup)banner.getParent()).removeView(banner);
-                        IronSource.destroyBanner(banner);
-                    }
+                if (!MainActivity.sdkInitialized) {
+                    Toast.makeText(requireContext(), "IronSource SDK not initialized yet", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                LevelPlay.setAdaptersDebug(true);
+                destroyBanner();
 
-//                DIOAdRequestHelper.addCustomAdRequestData();
-                banner = IronSource.createBanner(getActivity(), ISBannerSize.RECTANGLE);
-                banner.setLevelPlayBannerListener(new BannerAdListener(new UIControllerInterface() {
+                LevelPlayBannerAdView.Config cfg = new LevelPlayBannerAdView.Config.Builder()
+                        .setAdSize(LevelPlayAdSize.MEDIUM_RECTANGLE)
+                        .build();
+                banner = new LevelPlayBannerAdView(requireContext(), MainActivity.INFEED_AD_UNIT_ID, cfg);
+                banner.setBannerListener(new BannerAdListener(new UIControllerInterface() {
                     @Override
                     public void switchLoadButton(Boolean isEnabled) {
                         infeedViewModel.setLoadState(isEnabled);
@@ -70,7 +67,7 @@ public class InfeedFragment extends Fragment {
                         infeedViewModel.setShowState(isEnabled);
                     }
                 }));
-                IronSource.loadBanner(banner);
+                banner.loadAd();
             }
         });
         showInfeed = binding.showInfeed;
@@ -80,32 +77,39 @@ public class InfeedFragment extends Fragment {
             public void onClick(View view) {
                 infeedViewModel.setLoadState(true);
                 infeedViewModel.setShowState(false);
-                if (banner != null && !banner.isDestroyed()) {
+                if (banner != null) {
                     if (banner.getParent() != null) {
-                        ((ViewGroup)banner.getParent()).removeView(banner);
+                        ((ViewGroup) banner.getParent()).removeView(banner);
                     }
 
-                    binding.getRoot().addView(banner);
-                    ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) banner.getLayoutParams();
+                    float density = getResources().getDisplayMetrics().density;
+                    int widthPx = (int) (300 * density);
+                    int heightPx = (int) (250 * density);
+                    ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(widthPx, heightPx);
+                    params.topToTop = binding.getRoot().getId();
                     params.bottomToBottom = binding.getRoot().getId();
                     params.leftToLeft = binding.getRoot().getId();
                     params.rightToRight = binding.getRoot().getId();
-                    banner.setLayoutParams(params);
+                    binding.getRoot().addView(banner, params);
                 }
             }
         });
+    }
+
+    private void destroyBanner() {
+        if (banner != null) {
+            if (banner.getParent() != null) {
+                ((ViewGroup) banner.getParent()).removeView(banner);
+            }
+            banner.destroy();
+            banner = null;
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-        if (banner != null && !banner.isDestroyed()) {
-            if (banner.getParent() != null) {
-                ((ViewGroup)banner.getParent()).removeView(banner);
-            }
-            IronSource.destroyBanner(banner);
-            banner = null;
-        }
+        destroyBanner();
     }
 }
