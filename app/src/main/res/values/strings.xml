@@ -1,10 +1,17 @@
 <resources>
     <string name="app_name">IronSource_Android</string>
+    <string name="use_feed">Use Feed</string>
     <string name="title_interstitial">Interstitial</string>
+    <string name="title_rewarded">Rewarded</string>
+    <string name="title_banner">Banner</string>
     <string name="title_interscroller">Interscroller</string>
     <string name="title_infeed">Infeed</string>
     <string name="load_interstitial">Load Interstitial</string>
     <string name="show_interstitial">Show Interstitial</string>
+    <string name="load_rewarded">Load Rewarded</string>
+    <string name="show_rewarded">Show Rewarded</string>
+    <string name="load_banner">Load Banner</string>
+    <string name="show_banner">Show Banner</string>
     <string name="load_infeed">Load Infeed</string>
     <string name="show_infeed">Show Infeed</string>
     <string name="load_interscroller">Load Interscroller</string>

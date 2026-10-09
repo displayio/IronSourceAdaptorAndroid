@@ -2,8 +2,6 @@ package com.ironsource.adapters.custom.dio;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
@@ -16,6 +14,7 @@ import com.brandio.ads.listeners.AdRequestListener;
 import com.brandio.ads.placements.InterstitialPlacement;
 import com.brandio.ads.placements.Placement;
 import com.brandio.ads.request.AdRequest;
+import com.brandio.ads.tools.Utils;
 import com.ironsource.mediationsdk.adunit.adapter.BaseInterstitial;
 import com.ironsource.mediationsdk.adunit.adapter.listener.InterstitialAdListener;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdData;
@@ -39,7 +38,8 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
         }
         String placementID = adData.getString("dio_placement_id");
         if (placementID == null || placementID.isEmpty()) {
-            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0, "DIO SDK Missing placement ID");
+            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
+                    AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, "DIO SDK Missing placement ID");
             return;
         }
 
@@ -67,18 +67,14 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
 
             @Override
             public void onNoAds(DIOError dioError) {
-                listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        dioError != null && dioError.getMessage() != null
-                                ? dioError.getMessage()
-                                : "DIO SDK No fill");
+                listener.onAdLoadFailed(DIOCustomAdapter.loadErrorType(dioError), 0,
+                        DIOCustomAdapter.errorMessage(dioError, "DIO SDK No fill"));
             }
 
             @Override
             public void onFailedToLoad(DIOError dioError) {
-                listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        dioError != null && dioError.getMessage() != null
-                                ? dioError.getMessage()
-                                : "DIO SDK Failed to load ad");
+                listener.onAdLoadFailed(DIOCustomAdapter.loadErrorType(dioError), 0,
+                        DIOCustomAdapter.errorMessage(dioError, "DIO SDK Failed to load ad"));
             }
         });
         adRequest.requestAd();
@@ -102,8 +98,11 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
 
             @Override
             public void onFailedToShow(Ad ad, DIOError error) {
+                if (ad != null && ad.isImpressed()) {
+                    return;
+                }
                 listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL,
-                        error != null ? error.getMessage() : "DIO SDK Failed to show ad");
+                        DIOCustomAdapter.errorMessage(error, "DIO SDK Failed to show ad"));
             }
 
             @Override
@@ -114,9 +113,6 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
             @Override
             public void onClosed(Ad ad) {
                 listener.onAdClosed();
-                if (ad instanceof Interstitial.InterstitialVideo) {
-                    listener.onAdEnded();
-                }
             }
 
             @Override
@@ -137,19 +133,10 @@ public class DIOCustomInterstitial extends BaseInterstitial<DIOCustomAdapter> {
 
     @Override
     public void destroyAd(@NonNull AdData adData) {
-        runOnMain(() -> {
-            if (interstitialAd != null) {
-                interstitialAd.close();
-                interstitialAd = null;
-            }
-        });
-    }
-
-    private static void runOnMain(Runnable r) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            r.run();
-        } else {
-            new Handler(Looper.getMainLooper()).post(r);
+        Ad ad = interstitialAd;
+        interstitialAd = null;
+        if (ad != null) {
+            Utils.runOnMainThread(ad::close);
         }
     }
 }

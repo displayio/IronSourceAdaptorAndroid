@@ -23,16 +23,18 @@ import com.unity3d.mediation.LevelPlayInitRequest;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String APP_KEY = "1dc3f8185";
-    public static final String INTERSTITIAL_AD_UNIT_ID = "p6g336rjv5poqikz";
-    public static final String INFEED_AD_UNIT_ID = "q6ksnqakrnj7f4sm";
-    public static final String INTERSCROLLER_AD_UNIT_ID = "kuq0ay1tewbl178z";
-    public static final String NATIVE_AD_UNIT_ID = "jdhoydzd301ctp5c";
-    public static final String REWARDED_AD_UNIT_ID = "dfmt05knamyyvgg5";
+    private static final String APP_KEY = "2899bebd5";
+    public static final String INTERSTITIAL_AD_UNIT_ID = "24j8ex6kkizmok0c";
+    public static final String BANNER_AD_UNIT_ID = "png3j7cbl3vopz1x";
+    public static final String INFEED_AD_UNIT_ID = "82fh448z71tmdi71";
+    public static final String INTERSCROLLER_AD_UNIT_ID = "fkh04nw0iei42yl3";
+    public static final String NATIVE_AD_UNIT_ID = "fv8mnlt48901zu4z";
+    public static final String REWARDED_AD_UNIT_ID = "juhbq4gbwkgiy69h";
     public static final String TAG = "IS_Integration";
     public static final String IS_VER = "IronSource SDK Version: " + LevelPlay.getSdkVersion();
     public static final String DIO_VER = "DisplayIO SDK Version: " + Controller.getInstance().getVer();
     public static volatile boolean sdkInitialized = false;
+    public static volatile boolean useFeed = true;
     private ActivityMainBinding binding;
 
     @Override
@@ -48,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUI() {
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_interstitial, R.id.navigation_interscroller, R.id.navigation_infeed)
+                R.id.navigation_interstitial, R.id.navigation_rewarded, R.id.navigation_banner, R.id.navigation_interscroller, R.id.navigation_infeed)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -57,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         versionIS.setText(IS_VER);
         TextView versionDIO = binding.versionDioTxt;
         versionDIO.setText(DIO_VER);
+        binding.useFeed.setChecked(useFeed);
+        binding.useFeed.setOnCheckedChangeListener((buttonView, isChecked) -> useFeed = isChecked);
     }
 
     private void initIronSourceSDK() {

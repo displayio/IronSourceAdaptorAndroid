@@ -1,17 +1,19 @@
 package com.brandio.ironsource_android.ui.infeed;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.brandio.ironsource_android.MainActivity;
+import com.brandio.ironsource_android.ui.AdFeed;
 import com.brandio.ironsource_android.callback.BannerAdListener;
 import com.brandio.ironsource_android.callback.UIControllerInterface;
 import com.brandio.ironsource_android.databinding.FragmentInfeedBinding;
@@ -78,25 +80,29 @@ public class InfeedFragment extends Fragment {
                 infeedViewModel.setLoadState(true);
                 infeedViewModel.setShowState(false);
                 if (banner != null) {
-                    if (banner.getParent() != null) {
-                        ((ViewGroup) banner.getParent()).removeView(banner);
-                    }
-
                     float density = getResources().getDisplayMetrics().density;
-                    int widthPx = (int) (300 * density);
-                    int heightPx = (int) (250 * density);
-                    ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(widthPx, heightPx);
-                    params.topToTop = binding.getRoot().getId();
-                    params.bottomToBottom = binding.getRoot().getId();
-                    params.leftToLeft = binding.getRoot().getId();
-                    params.rightToRight = binding.getRoot().getId();
-                    binding.getRoot().addView(banner, params);
+                    showAd((int) (300 * density), (int) (250 * density));
                 }
             }
         });
     }
 
+    private void showAd(int widthPx, int heightPx) {
+        binding.adContainer.removeAllViews();
+        if (banner.getParent() != null) {
+            ((ViewGroup) banner.getParent()).removeView(banner);
+        }
+        if (MainActivity.useFeed) {
+            binding.adContainer.addView(AdFeed.create(requireContext(), banner, new ViewGroup.LayoutParams(widthPx, heightPx)));
+        } else {
+            binding.adContainer.addView(banner, new FrameLayout.LayoutParams(widthPx, heightPx, Gravity.CENTER_HORIZONTAL));
+        }
+    }
+
     private void destroyBanner() {
+        if (binding != null) {
+            binding.adContainer.removeAllViews();
+        }
         if (banner != null) {
             if (banner.getParent() != null) {
                 ((ViewGroup) banner.getParent()).removeView(banner);
@@ -109,7 +115,7 @@ public class InfeedFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
         destroyBanner();
+        binding = null;
     }
 }

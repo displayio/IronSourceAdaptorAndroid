@@ -1,8 +1,7 @@
 package com.ironsource.adapters.custom.dio;
 
 import android.app.Activity;
-import android.os.Handler;
-import android.os.Looper;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -33,10 +32,8 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 import com.ironsource.mediationsdk.model.NetworkSettings;
 
 public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
-    private Ad bannerDIOAd;
-    private Ad mrectDIOAd;
-    private Ad infeedDIOAd;
-    private Ad interscrollerDIOAd;
+    private Ad bannerAd;
+    private volatile boolean destroyed;
 
     public DIOCustomBanner(NetworkSettings networkSettings) {
         super(networkSettings);
@@ -52,49 +49,59 @@ public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
         }
         String placementID = adData.getString("dio_placement_id");
         if (placementID == null || placementID.isEmpty()) {
-            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0, "DIO SDK Missing placement ID");
+            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
+                    AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, "DIO SDK Missing placement ID");
             return;
         }
 
         Placement placement;
         try {
-            placement = Controller.getInstance().getPlacement(placementID);
+            placement = controller.getPlacement(placementID);
         } catch (Exception e) {
             listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0,
                     "DIO SDK Inactive placement or wrong placement ID");
             return;
         }
 
+        boolean isRectangleSize = isBannerSize.getHeight() >= 250;
+        boolean isRectanglePlacement = placement instanceof InfeedPlacement || placement instanceof MediumRectanglePlacement;
+        if ((placement instanceof BannerPlacement && isRectangleSize) || (isRectanglePlacement && !isRectangleSize)) {
+            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0,
+                    "DIO SDK Placement " + placementID + " does not match banner size " + isBannerSize.getDescription());
+            return;
+        }
+
+        destroyed = false;
         AdRequest adRequest = placement.newAdRequest();
         final String adRequestId = adRequest.getId();
 
         adRequest.setAdRequestListener(new AdRequestListener() {
             @Override
             public void onAdReceived(Ad ad) {
+                if (destroyed) {
+                    ad.close();
+                    return;
+                }
                 ViewGroup adView = null;
                 FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                         Utils.dpToPx(300), Utils.dpToPx(250));
                 if (placement instanceof BannerPlacement) {
-                    bannerDIOAd = ad;
                     BannerContainer bannerContainer = ((BannerPlacement) placement).getContainer(adRequestId);
                     adView = BannerContainer.getAdView(activity);
                     bannerContainer.bindTo(adView);
                     layoutParams = new FrameLayout.LayoutParams(
                             Utils.dpToPx(320), Utils.dpToPx(50));
                 } else if (placement instanceof MediumRectanglePlacement) {
-                    mrectDIOAd = ad;
                     MediumRectangleContainer mediumRectangleContainer = ((MediumRectanglePlacement) placement)
                             .getContainer(adRequestId);
                     adView = MediumRectangleContainer.getAdView(activity);
                     mediumRectangleContainer.bindTo(adView);
                 } else if (placement instanceof InfeedPlacement) {
-                    infeedDIOAd = ad;
                     adView = InfeedContainer.getAdView(activity);
                     InfeedContainer infeedContainer =
                             ((InfeedPlacement) placement).getContainer(adRequestId);
                     infeedContainer.bindTo(adView);
                 } else if (placement instanceof InterscrollerPlacement) {
-                    interscrollerDIOAd = ad;
                     adView = InterscrollerContainer.getAdView(activity);
                     adView.setId(Integer.parseInt(ad.getPlacementId()));
                     InterscrollerContainer interscrollerContainer =
@@ -110,52 +117,63 @@ public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
                             ViewGroup.LayoutParams.MATCH_PARENT);
                 }
 
-                if (adView != null) {
-                    ad.setEventListener(
-                            new AdEventListener() {
-                                @Override
-                                public void onShown(Ad ad) {
+                if (adView == null) {
+                    ad.close();
+                    listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL, 0,
+                            "DIO SDK Unsupported placement type for banner");
+                    return;
+                }
+                bannerAd = ad;
+                layoutParams.gravity = Gravity.CENTER;
+                ad.setEventListener(
+                        new AdEventListener() {
+                            @Override
+                            public void onShown(Ad ad) {
+                                if (!destroyed) {
                                     listener.onAdOpened();
                                 }
+                            }
 
-                                @Override
-                                public void onFailedToShow(Ad ad, DIOError error) {
-                                    listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL,
-                                            error != null ? error.getMessage() : "DIO SDK Failed to show ad");
+                            @Override
+                            public void onFailedToShow(Ad ad, DIOError error) {
+                                if (destroyed || (ad != null && ad.isImpressed())) {
+                                    return;
                                 }
+                                listener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL,
+                                        DIOCustomAdapter.errorMessage(error, "DIO SDK Failed to show ad"));
+                            }
 
-                                @Override
-                                public void onClicked(Ad ad) {
+                            @Override
+                            public void onClicked(Ad ad) {
+                                if (!destroyed) {
                                     listener.onAdClicked();
                                 }
-
-                                @Override
-                                public void onClosed(Ad ad) {
-                                    listener.onAdScreenDismissed();
-                                }
                             }
-                    );
-                    listener.onAdLoadSuccess(adView, layoutParams);
-                } else {
-                    listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                            "DIO SDK Failed to load ad");
-                }
+
+                            @Override
+                            public void onClosed(Ad ad) {
+                            }
+                        }
+                );
+                listener.onAdLoadSuccess(adView, layoutParams);
             }
 
             @Override
             public void onFailedToLoad(DIOError dioError) {
-                listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        dioError != null && dioError.getMessage() != null
-                                ? dioError.getMessage()
-                                : "DIO SDK Failed to load ad");
+                if (destroyed) {
+                    return;
+                }
+                listener.onAdLoadFailed(DIOCustomAdapter.loadErrorType(dioError), 0,
+                        DIOCustomAdapter.errorMessage(dioError, "DIO SDK Failed to load ad"));
             }
 
             @Override
             public void onNoAds(DIOError dioError) {
-                listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL, 0,
-                        dioError != null && dioError.getMessage() != null
-                                ? dioError.getMessage()
-                                : "DIO SDK No fill");
+                if (destroyed) {
+                    return;
+                }
+                listener.onAdLoadFailed(DIOCustomAdapter.loadErrorType(dioError), 0,
+                        DIOCustomAdapter.errorMessage(dioError, "DIO SDK No fill"));
             }
         });
         adRequest.requestAd();
@@ -163,31 +181,11 @@ public class DIOCustomBanner extends BaseBanner<DIOCustomAdapter> {
 
     @Override
     public void destroyAd(@NonNull AdData adData) {
-        runOnMain(() -> {
-            if (bannerDIOAd != null && bannerDIOAd.isImpressed()) {
-                bannerDIOAd.close();
-                bannerDIOAd = null;
-            }
-            if (mrectDIOAd != null && mrectDIOAd.isImpressed()) {
-                mrectDIOAd.close();
-                mrectDIOAd = null;
-            }
-            if (infeedDIOAd != null && infeedDIOAd.isImpressed()) {
-                infeedDIOAd.close();
-                infeedDIOAd = null;
-            }
-            if (interscrollerDIOAd != null && interscrollerDIOAd.isImpressed()) {
-                interscrollerDIOAd.close();
-                interscrollerDIOAd = null;
-            }
-        });
-    }
-
-    private static void runOnMain(Runnable r) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            r.run();
-        } else {
-            new Handler(Looper.getMainLooper()).post(r);
+        destroyed = true;
+        Ad ad = bannerAd;
+        bannerAd = null;
+        if (ad != null) {
+            Utils.runOnMainThread(ad::close);
         }
     }
 }

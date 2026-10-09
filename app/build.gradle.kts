@@ -42,8 +42,8 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.6.0")
     implementation("androidx.navigation:navigation-ui:2.6.0")
 
-    implementation("com.brandio.ads:sdk:5.7.1")
-    implementation("com.ironsource.sdk:mediationsdk:9.2.0")
+    implementation("com.brandio.ads:sdk:5.8.1")
+    implementation("com.unity3d.ads-mediation:mediation-sdk:9.6.1")
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("com.google.android.gms:play-services-appset:16.0.0")

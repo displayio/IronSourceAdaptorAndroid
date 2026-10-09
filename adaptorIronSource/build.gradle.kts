@@ -4,7 +4,7 @@ plugins {
     id("com.android.library")
 }
 
-version = "5.7.1"
+version = "5.8.1"
 
 android {
     namespace = "com.ironsource.adapters.custom.dio"
@@ -32,9 +32,9 @@ android {
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.11.0")
-    implementation ("com.brandio.ads:sdk:5.7.1")
-    implementation ("com.ironsource.sdk:mediationsdk:9.2.0")
+    implementation ("com.brandio.ads:sdk:5.8.1")
+    compileOnly ("com.unity3d.ads-mediation:mediation-sdk:9.6.1")
+    compileOnly ("androidx.annotation:annotation:1.9.1")
 }
 
 //   ./gradlew makeAar

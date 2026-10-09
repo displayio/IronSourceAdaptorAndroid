@@ -13,9 +13,6 @@ dependencyResolutionManagement {
         maven {
             url = uri("https://maven.display.io/")
         }
-        maven {
-            url = uri("https://android-sdk.is.com/")
-        }
     }
 }
 

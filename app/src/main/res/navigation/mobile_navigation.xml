@@ -12,6 +12,18 @@
         tools:layout="@layout/fragment_interstitial" />
 
     <fragment
+        android:id="@+id/navigation_rewarded"
+        android:name="com.brandio.ironsource_android.ui.rewarded.RewardedFragment"
+        android:label="@string/title_rewarded"
+        tools:layout="@layout/fragment_rewarded" />
+
+    <fragment
+        android:id="@+id/navigation_banner"
+        android:name="com.brandio.ironsource_android.ui.banner.BannerFragment"
+        android:label="@string/title_banner"
+        tools:layout="@layout/fragment_banner" />
+
+    <fragment
         android:id="@+id/navigation_interscroller"
         android:name="com.brandio.ironsource_android.ui.interscroller.InterscrollerFragment"
         android:label="@string/title_interscroller"

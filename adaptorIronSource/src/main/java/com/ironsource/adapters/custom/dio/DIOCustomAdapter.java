@@ -7,14 +7,32 @@ import androidx.annotation.Nullable;
 
 import com.brandio.ads.Controller;
 import com.brandio.ads.exceptions.DIOError;
+import com.brandio.ads.exceptions.DioErrorCode;
 import com.brandio.ads.listeners.SdkInitListener;
 import com.ironsource.mediationsdk.adunit.adapter.BaseAdapter;
 import com.ironsource.mediationsdk.adunit.adapter.listener.NetworkInitializationListener;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdData;
+import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrorType;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 
 public class DIOCustomAdapter extends BaseAdapter {
     public static final String DIO_AD_REQUEST = "dioAdRequest";
+    static final String ADAPTER_VERSION = "5.8.1";
+
+    static AdapterErrorType loadErrorType(DIOError error) {
+        if (error == null) {
+            return AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL;
+        }
+        DioErrorCode code = error.getErrorCode();
+        if (code == DioErrorCode.ErrorNoFill || code == DioErrorCode.ErrorNoAds) {
+            return AdapterErrorType.ADAPTER_ERROR_TYPE_NO_FILL;
+        }
+        return AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL;
+    }
+
+    static String errorMessage(DIOError error, String fallback) {
+        return error != null && error.getMessage() != null ? error.getMessage() : fallback;
+    }
 
     @Override
     public void init(@NonNull AdData adData, @NonNull Context context, @Nullable NetworkInitializationListener networkInitializationListener) {
@@ -53,6 +71,6 @@ public class DIOCustomAdapter extends BaseAdapter {
     @NonNull
     @Override
     public String getAdapterVersion() {
-        return Controller.getInstance().getVer();
+        return ADAPTER_VERSION;
     }
 }
