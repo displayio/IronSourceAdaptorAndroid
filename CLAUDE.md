@@ -80,7 +80,11 @@ Validate changes with compile tasks; only build the release AAR when actually re
 - LevelPlay never shows custom adapters in `validateIntegration` or the Test Suite; it only logs
   the adapter version when the adapter is allocated.
 - The iOS counterpart lives in `~/Desktop/iOSWork/IronSource_iOS` — keep event mapping in parity.
-- Release notes: [`CHANGELOG.md`](./CHANGELOG.md). Adapter versions are three-part and follow
-  the DIO SDK version they ship with (e.g. `5.8.1`).
+- Adapter versions are three-part and **always equal the DIO SDK version** they ship with
+  (e.g. `5.8.1`): bump the module `version` and `DIOCustomAdapter.ADAPTER_VERSION` on every DIO SDK
+  update.
+- On **every** update (SDK bump, fix, feature) update all three files in the same change:
+  [`CHANGELOG.md`](./CHANGELOG.md) (new section for the version), [`HANDOFF.md`](./HANDOFF.md)
+  (current state, open problems, next steps) and this `CLAUDE.md` (versions, rules, structure).
 - Commits: Conventional Commits; **do not add a Co-Authored-By trailer and do not mention Claude
   in commit messages.**
